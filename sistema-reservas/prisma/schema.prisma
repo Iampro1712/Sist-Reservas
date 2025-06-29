@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de Usuario
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      UserRole @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  reservations  Reservation[]
+  services      Service[]      // Solo para ADMIN/PROVIDER
+  notifications Notification[]
+
+  @@map("users")
+}
+
+// Modelo de Servicio
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  duration    Int      // duración en minutos
+  price       Float
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  providerId   String
+  provider     User          @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  reservations Reservation[]
+  schedules    Schedule[]
+
+  @@map("services")
+}
+
+// Modelo de Horarios Disponibles
+model Schedule {
+  id        String   @id @default(cuid())
+  dayOfWeek Int      // 0 = Domingo, 1 = Lunes, etc.
+  startTime String   // formato "HH:mm"
+  endTime   String   // formato "HH:mm"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@map("schedules")
+}
+
+// Modelo de Reserva
+model Reservation {
+  id          String            @id @default(cuid())
+  date        DateTime
+  startTime   String            // formato "HH:mm"
+  endTime     String            // formato "HH:mm"
+  status      ReservationStatus @default(PENDING)
+  notes       String?
+  totalPrice  Float
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Relaciones
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  // Notificaciones relacionadas
+  notifications Notification[]
+
+  @@map("reservations")
+}
+
+// Modelo de Notificación
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  sentAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  // Relaciones
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reservationId String?
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// Enums
+enum UserRole {
+  CLIENT
+  ADMIN
+  PROVIDER
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum NotificationType {
+  RESERVATION_CONFIRMED
+  RESERVATION_CANCELLED
+  RESERVATION_REMINDER
+  SCHEDULE_CHANGE
+  SYSTEM_NOTIFICATION
+}

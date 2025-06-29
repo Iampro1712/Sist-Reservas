@@ -1,0 +1,24 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo circular azul -->
+  <circle cx="16" cy="16" r="16" fill="#2563eb"/>
+  
+  <!-- Calendario -->
+  <rect x="6" y="8" width="20" height="18" rx="2" fill="white"/>
+  <rect x="6" y="8" width="20" height="5" rx="2" fill="#1e40af"/>
+  
+  <!-- Anillas -->
+  <rect x="10" y="5" width="1.5" height="6" rx="0.75" fill="#6b7280"/>
+  <rect x="20.5" y="5" width="1.5" height="6" rx="0.75" fill="#6b7280"/>
+  
+  <!-- Puntos del calendario -->
+  <circle cx="10" cy="16" r="1.5" fill="#2563eb"/>
+  <circle cx="16" cy="16" r="1.5" fill="#10b981"/>
+  <circle cx="22" cy="16" r="1.5" fill="#2563eb"/>
+  <circle cx="10" cy="20" r="1.5" fill="#2563eb"/>
+  <circle cx="16" cy="20" r="1.5" fill="#2563eb"/>
+  <circle cx="22" cy="20" r="1.5" fill="#ef4444"/>
+  
+  <!-- Check de disponibilidad -->
+  <circle cx="24" cy="10" r="3" fill="#10b981"/>
+  <path d="M22.5 10L23.5 11L25.5 9" stroke="white" stroke-width="1" stroke-linecap="round"/>
+</svg>
