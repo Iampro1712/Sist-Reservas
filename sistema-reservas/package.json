@@ -11,7 +11,6 @@
     "lint": "next lint",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "npx prisma migrate reset --force && npm run db:seed",
-
     "generate:favicon": "node scripts/generate-favicon.js",
     "prepare:deploy": "./deploy.sh"
   },
@@ -30,6 +29,8 @@
     "autoprefixer": "^10.4.21",
     "bcryptjs": "^3.0.2",
     "date-fns": "^4.1.0",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.4",
     "jsonwebtoken": "^9.0.2",
     "next": "15.3.4",
     "node-cron": "^4.1.1",
@@ -40,14 +41,13 @@
     "react-dom": "^19.0.0",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
-    "eslint": "^9",
-    "eslint-config-next": "15.3.4",
     "tailwindcss": "^4",
     "typescript": "^5",
     "zod": "^3.25.67"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@netlify/plugin-nextjs": "^5.11.4",
     "tsx": "^4.20.3"
   }
 }
