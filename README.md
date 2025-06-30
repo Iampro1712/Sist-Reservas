@@ -52,7 +52,14 @@ Este sistema es **adaptable** para cualquier negocio que maneje citas o reservas
 
 ## 🚀 Características
 
+### 🔒 **API v1.1.0 - Nueva Versión con Rate Limiting**
+
 - **Autenticación JWT**: Sistema seguro de autenticación con roles (Admin, Provider, Client)
+- **Rate Limiting**: Protección contra abuso de APIs con límites personalizados
+  - **Autenticación**: 5 intentos por 15 minutos (login/register)
+  - **APIs Generales**: 100 requests por 15 minutos (servicios, reservas)
+  - **Health Check**: 60 requests por minuto
+  - **Storage**: Redis para producción, memoria local como fallback
 - **Gestión de Servicios**: CRUD completo para servicios con horarios personalizables
 - **Sistema de Reservas**: Reservas con validación de disponibilidad y conflictos
 - **Disponibilidad en Tiempo Real**: Socket.io para actualizaciones instantáneas
@@ -65,6 +72,7 @@ Este sistema es **adaptable** para cualquier negocio que maneje citas o reservas
 
 - **Backend**: Next.js 15 (API Routes)
 - **Base de Datos**: PostgreSQL + Prisma ORM
+- **Cache/Rate Limiting**: Redis (opcional)
 - **Autenticación**: JWT + bcrypt
 - **Tiempo Real**: Socket.io
 - **Validación**: Zod
@@ -105,6 +113,16 @@ EMAIL_PORT=587
 EMAIL_USER="tu-email@gmail.com"
 EMAIL_PASS="tu-app-password"
 
+# Redis Configuration (Rate Limiting - v1.1.0)
+# Opción 1: Configuración individual (recomendada)
+REDIS_HOST="tu-host-redis"
+REDIS_PORT=14042
+REDIS_USERNAME="default"
+REDIS_PASSWORD="tu-redis-password"
+
+# Opción 2: URL completa (alternativa)
+# REDIS_URL="redis://username:password@host:port"
+
 # App Configuration
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="tu-nextauth-secret"
@@ -121,6 +139,37 @@ npx prisma migrate dev
 # Poblar con datos de prueba
 npm run db:seed
 ```
+
+5. **Configurar Redis (Opcional - Rate Limiting v1.1.0)**
+
+Redis es **opcional** pero **recomendado** para producción. Sin Redis, el rate limiting usa memoria local.
+
+### 🔧 **Opciones de Redis**
+
+**Para Desarrollo Local:**
+```bash
+# Instalar Redis localmente
+sudo apt install redis-server  # Ubuntu/Debian
+brew install redis             # macOS
+
+# En .env
+REDIS_HOST="localhost"
+REDIS_PORT=6379
+```
+
+**Para Producción (Redis Cloud - Recomendado):**
+```bash
+# En .env o variables de Netlify
+REDIS_HOST="tu-host-redis"
+REDIS_PORT=14042
+REDIS_USERNAME="default"
+REDIS_PASSWORD="tu-password"
+```
+
+**Proveedores Recomendados:**
+- **Redis Cloud**: Plan gratuito 30MB
+- **Upstash**: Serverless Redis
+- **Railway**: Redis con plan gratuito
 
 5. **Iniciar el servidor**
 ```bash
@@ -319,6 +368,9 @@ prisma/
 
 ## 🚀 Despliegue en Netlify
 
+### 🔒 **Versión v1.1.0 con Rate Limiting**
+Esta versión incluye protección automática contra abuso de APIs. El rate limiting se activa automáticamente en producción.
+
 ### 📋 Preparación del Proyecto
 
 El proyecto ya está configurado para Netlify con:
@@ -381,6 +433,12 @@ El proyecto ya está configurado para Netlify con:
    # Base de datos (Supabase)
    DATABASE_URL=postgresql://postgres:[password]@db.[project].supabase.co:5432/postgres
 
+   # Redis (Rate Limiting v1.1.0 - Opcional pero recomendado)
+   REDIS_HOST=tu-host-redis
+   REDIS_PORT=14042
+   REDIS_USERNAME=default
+   REDIS_PASSWORD=tu-redis-password
+
    # JWT (genera uno seguro)
    JWT_SECRET=tu-jwt-secret-super-seguro-para-produccion-256-bits
 
@@ -434,6 +492,16 @@ DATABASE_URL="postgresql://postgres:[password]@db.[project].supabase.co:5432/pos
 
 # Neon (alternativa)
 # DATABASE_URL="postgresql://[user]:[password]@[endpoint]/[dbname]"
+
+# === REDIS (RATE LIMITING v1.1.0) ===
+# Redis Cloud (recomendado para producción)
+REDIS_HOST="tu-host-redis"
+REDIS_PORT=14042
+REDIS_USERNAME="default"
+REDIS_PASSWORD="tu-redis-password"
+
+# Alternativa: URL completa
+# REDIS_URL="redis://username:password@host:port"
 
 # === AUTENTICACIÓN ===
 JWT_SECRET="genera-un-secret-de-256-bits-super-seguro"
@@ -565,13 +633,34 @@ DEBUG=prisma:* npm run build
 
 Ver ejemplos completos en la sección de APIs.
 
+## 🔄 Changelog
+
+### v1.1.0 (2024-06-29) - Rate Limiting
+- ✨ **Nueva Feature**: Rate Limiting implementado para protección de APIs
+- 🔒 **Seguridad**: Protección contra ataques de fuerza bruta en autenticación
+- 📊 **Límites configurados**:
+  - Autenticación (login/register): 5 intentos por 15 minutos
+  - APIs generales (servicios, reservas): 100 requests por 15 minutos
+  - Health check: 60 requests por minuto
+- 📈 **Headers informativos**: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+- 🚨 **Respuestas HTTP 429**: Cuando se exceden los límites
+- 🌐 **Compatible con Netlify**: Detección automática de IP desde headers de proxy
+- 🗄️ **Redis Integration**: Soporte para Redis como storage (opcional, fallback a memoria)
+
+### v1.0.0 (2024-06-28) - Lanzamiento Inicial
+- 🎉 **Sistema completo de reservas** con autenticación JWT
+- 📅 **Gestión de servicios y horarios** personalizables
+- 🔔 **Notificaciones automáticas** por email
+- ⚡ **Tiempo real** con Socket.io
+- 🗄️ **Base de datos PostgreSQL** con Prisma ORM
+
 ## 📝 Notas de Desarrollo
 
 - **Socket.io**: Actualmente comentado en server.js, requiere configuración TypeScript
 - **Emails**: Configurar SMTP real para producción
 - **Base de datos**: Usar PostgreSQL en producción (Supabase recomendado)
 - **Logs**: Implementar sistema de logs para producción
-- **Rate Limiting**: Agregar para APIs públicas
+- **Rate Limiting**: ✅ **Implementado en v1.1.0** - Protección automática contra abuso de APIs
 
 ## 🤝 Contribuir
 
@@ -675,12 +764,13 @@ npm run build
 - **Despliegue**: Netlify + Supabase
 
 ### 📊 **Métricas del Proyecto**
-- **APIs**: 15+ endpoints funcionales
+- **APIs**: 15+ endpoints funcionales con Rate Limiting (v1.1.0)
 - **Modelos**: 5 modelos de base de datos
 - **Usuarios de prueba**: 5 roles diferentes
 - **Servicios de ejemplo**: 4 servicios configurados
 - **Horarios**: Sistema flexible por días
 - **Notificaciones**: 5 tipos diferentes
+- **Seguridad**: Rate limiting en 3 niveles diferentes
 - **Documentación**: README completo con ejemplos
 
 ### 🎨 **Branding y UI**

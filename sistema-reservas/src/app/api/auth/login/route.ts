@@ -4,8 +4,9 @@ import { verifyPassword } from '@/lib/auth'
 import { signToken } from '@/lib/jwt'
 import { validateData, loginSchema } from '@/lib/validations'
 import { ApiResponse, AuthResponse } from '@/types'
+import { authRateLimit } from '@/lib/rateLimit'
 
-export async function POST(request: NextRequest) {
+async function loginHandler(request: NextRequest) {
   try {
     const body = await request.json()
     
@@ -73,3 +74,6 @@ export async function POST(request: NextRequest) {
     }, { status: 500 })
   }
 }
+
+// Aplicar rate limiting al endpoint de login
+export const POST = authRateLimit(loginHandler)

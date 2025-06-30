@@ -4,8 +4,9 @@ import { hashPassword } from '@/lib/auth'
 import { signToken } from '@/lib/jwt'
 import { validateData, registerSchema } from '@/lib/validations'
 import { ApiResponse, AuthResponse } from '@/types'
+import { authRateLimit } from '@/lib/rateLimit'
 
-export async function POST(request: NextRequest) {
+async function registerHandler(request: NextRequest) {
   try {
     const body = await request.json()
     
@@ -78,3 +79,6 @@ export async function POST(request: NextRequest) {
     }, { status: 500 })
   }
 }
+
+// Aplicar rate limiting al endpoint de registro
+export const POST = authRateLimit(registerHandler)

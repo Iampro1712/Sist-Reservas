@@ -4,6 +4,7 @@ import { requireProvider, AuthenticatedRequest } from '@/middleware/auth'
 import { validateData, createServiceSchema, serviceFiltersSchema } from '@/lib/validations'
 import { ApiResponse } from '@/types'
 import type { Prisma } from '@prisma/client'
+import { moderateRateLimit } from '@/lib/rateLimit'
 
 // GET - Obtener servicios con filtros
 async function getHandler(request: NextRequest) {
@@ -132,5 +133,6 @@ async function postHandler(request: AuthenticatedRequest) {
   }
 }
 
-export const GET = getHandler
-export const POST = requireProvider(postHandler)
+// Aplicar rate limiting a los endpoints
+export const GET = moderateRateLimit(getHandler)
+export const POST = moderateRateLimit(requireProvider(postHandler))

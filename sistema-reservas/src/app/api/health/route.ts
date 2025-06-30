@@ -1,13 +1,15 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { generalRateLimit } from '@/lib/rateLimit'
 
-export async function GET() {
+async function healthHandler(request: NextRequest) {
   try {
     return NextResponse.json({
       success: true,
       message: 'Sistema de Reservas API funcionando correctamente',
       timestamp: new Date().toISOString(),
       status: 'healthy',
-      version: '1.0.0',
+      version: '1.1.0', // Nueva versión con rate limiting
+      userAgent: request.headers.get('user-agent') || 'unknown',
       endpoints: {
         auth: '/api/auth/*',
         services: '/api/services/*',
@@ -24,3 +26,6 @@ export async function GET() {
     }, { status: 500 })
   }
 }
+
+// Aplicar rate limiting al endpoint de health
+export const GET = generalRateLimit(healthHandler)
